@@ -10,7 +10,7 @@ using UnityEngine.Networking;
 using System;
 using Newtonsoft.Json;
 using System.Text;
-using Newtonsoft;
+using Newtonsoft.Json.Linq;
 public class PhoneCamera : MonoBehaviour
 {
     /*public SnapshotCamera snapCam;*/
@@ -114,9 +114,9 @@ public class PhoneCamera : MonoBehaviour
 
     public void SavePhoto()
     {
-        print("lol");
-        test.SetActive(true);
-        Debug.Log(Application.dataPath);
+        /*print("lol");*/
+        /*test.SetActive(true);*/
+        /*Debug.Log(Application.dataPath);*/
         Texture2D photo = new Texture2D(camTexture.width, camTexture.height);
         photo.SetPixels(camTexture.GetPixels());
         photo.Apply();
@@ -133,28 +133,46 @@ public class PhoneCamera : MonoBehaviour
         string base64Image = Convert.ToBase64String(bytes);
 
 
-        var post = new Dictionary<string, string>()
-        {
-            {
-                "imgstr",base64Image
-            }
-        };
+        /*  var post = new Dictionary<string, string>()
+          {
+              {
+                  "imgstr",base64Image
+              }
+          };
 
-        var newpostjson = JsonConvert.SerializeObject(post);
-        Console.WriteLine(post);
+          var newpostjson = JsonConvert.SerializeObject(post);
+          Console.WriteLine(post);
 
-        var payload = new StringContent(newpostjson, Encoding.UTF8, "application/json");
-        Console.WriteLine(payload);
+          var payload = new StringContent(newpostjson, Encoding.UTF8, "application/json");
+          Console.WriteLine(payload);
 
+        
+          var endpoint = new Uri("http://74.235.83.70:80/predict/");
 
-        var endpoint = new Uri("http://74.235.83.70:80/predict/");
+          var result = client.PostAsync(endpoint, payload).Result.Content.ReadAsStringAsync().Result;
+          Debug.Log(endpoint);
+          Console.WriteLine(result);
+          Console.WriteLine(base64Image);*/
 
-        var result = client.PostAsync(endpoint, payload).Result.Content.ReadAsStringAsync().Result;
-        Debug.Log(endpoint);
-        Console.WriteLine(result);
-        Console.WriteLine(base64Image);
+        string url = "http://74.235.83.70:80/predict/";
+
+        UnityWebRequest request = new UnityWebRequest(url, "POST");
+
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        JObject jsonobject = new JObject();
+
      
+        jsonobject["imgstr"] = base64Image;
 
+        byte[] bodyRaw = new System.Text.UTF8Encoding(true).GetBytes(jsonobject.ToString());
+        request.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
+
+        request.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
+
+        request.SendWebRequest();
+
+        print(bodyRaw);
 
     }
     
